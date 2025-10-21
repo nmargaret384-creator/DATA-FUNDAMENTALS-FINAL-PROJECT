@@ -143,17 +143,9 @@ Can manage event capacity, pricing, and availability
 Can execute admin-only SQL functions, such as:
 
 ```sql
--- Delete any event (admin-only)
-SELECT delete_event('event-uuid-here');
-
--- Generate event sales report
-SELECT * FROM get_event_sales_report();
-
--- Archive past events (e.g., older than 6 months)
-SELECT * FROM archive_past_events();
+DELETE FROM tickets
+WHERE status = 'cancelled';
 ```
-
-
 
 
 ### Database Structure
@@ -162,119 +154,58 @@ The database consists of three main tables — users, events, and tickets.
 Each table has Row Level Security (RLS) enabled to ensure users can only access their own data, while admins have full control.
 
 🧑‍💻 Users Table
-| Column     | Type      | Description                                 |
-| ---------- | --------- | ------------------------------------------- |
-| id         | UUID      | Primary key (matches Supabase Auth user ID) |
-| full_name  | TEXT      | User’s full name                            |
-| email      | TEXT      | User email (unique)                         |
-| role       | TEXT      | `'admin'` or `'user'`                       |
-| created_at | TIMESTAMP | Record creation time                        |
-
-Notes:
-
-Admins can view and manage all users.
-
-Regular users can only view or edit their own profile (except the role field).
-
+| Column     | Type                      | Description                  |
+| ---------- | ------------------------- | ---------------------------- |
+| user_id    | `serial primary key`      | Unique user identifier       |
+| email      | `text unique not null`    | User’s email address         |
+| full_name  | `text`                    | User’s full name             |
+| role       | `text`                    | Either `'admin'` or `'user'` |
+| created_at | `timestamp default now()` | When the account was created |
 
 🎤 Events Table
 
-| Column      | Type      | Description                        |
-| ----------- | --------- | ---------------------------------- |
-| id          | UUID      | Primary key                        |
-| admin_id    | UUID      | Foreign key referencing `users.id` |
-| title       | TEXT      | Event title                        |
-| description | TEXT      | Event description                  |
-| location    | TEXT      | Venue or city name                 |
-| event_date  | DATE      | Date of the event                  |
-| price       | NUMERIC   | Ticket price                       |
-| capacity    | INTEGER   | Total number of tickets available  |
-| created_at  | TIMESTAMP | When the event was created         |
+| Column     | Type                                | Description                 |
+| ---------- | ----------------------------------- | --------------------------- |
+| event_id   | `serial primary key`                | Unique ID for each event    |
+| event_name | `text`                              | Name of the event           |
+| event_date | `date`                              | When the event will happen  |
+| location   | `text`                              | Where the event is held     |
+| price      | `numeric(10,2)`                     | Default ticket price        |
+| created_by | `integer references users(user_id)` | Admin who created the event |
+| created_at | `timestamp default now()`           | When event was created      |
 
-Notes:
-
-Only admins (event organizers) can create, update, or delete events.
-
-Regular users can view all events but not modify them.
-
-RLS ensures users can’t insert or modify events unless they are admins.
 
 🎫 Tickets Table
 
-| Column      | Type      | Description                            |
-| ----------- | --------- | -------------------------------------- |
-| id          | UUID      | Primary key                            |
-| event_id    | UUID      | Foreign key referencing `events.id`    |
-| user_id     | UUID      | Foreign key referencing `users.id`     |
-| quantity    | INTEGER   | Number of tickets purchased            |
-| total_price | NUMERIC   | Auto-calculated as `price * quantity`  |
-| status      | TEXT      | `'booked'`, `'cancelled'`, or `'used'` |
-| created_at  | TIMESTAMP | Booking timestamp                      |
+| Column      | Type                                  | Description                      |
+| ----------- | ------------------------------------- | -------------------------------- |
+| ticket_id   | `serial primary key`                  | Unique ticket number             |
+| event_id    | `integer references events(event_id)` | The event this ticket belongs to |
+| user_id     | `integer references users(user_id)`   | The user who bought the ticket   |
+| seat_number | `text`                                | Optional seat number or category |
+| status      | `text`                                | e.g., `'active'`, `'cancelled'`  |
+| created_at  | `timestamp default now()`             | Purchase date                    |
 
-Notes:
+🔐 User Roles & Permissions Summary
+🧑‍💻 1. Users Table
+| Role      | Access Level                                   | Description                                                                                              |
+| --------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Admin** | ✅ Full access (SELECT, INSERT, UPDATE, DELETE) | Can manage all user accounts, update roles, and remove inactive users.                                   |
+| **User**  | 🔍 Read-only (SELECT, UPDATE own record)       | Can view and update their own profile information, but **cannot** change their role or view other users. |
 
-Regular users can view and manage their own tickets only.
+🎤 2. Events Table
+| Role      | Access Level               | Description                                                                        |
+| --------- | -------------------------- | ---------------------------------------------------------------------------------- |
+| **Admin** | ✅ Full access              | Can create, update, and delete any event. Also manages pricing and event capacity. |
+| **User**  | 🔍 Read-only (SELECT only) | Can view all available events but **cannot** modify or delete them.                |
 
-Admins can view all tickets to monitor event sales.
+🎟️ 3. Tickets Table
+| Role      | Access Level      | Description                                                                                                                           |
+| --------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Admin** | ✅ Full access     | Can view, update, and delete any ticket — useful for handling refunds, cancellations, or fraud.                                       |
+| **User**  | ✏️ Limited access | Can create (book) their own tickets and view, update, or cancel only their own bookings. Cannot see tickets belonging to other users. |
 
-Policies prevent users from viewing or editing other users’ bookings.
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## 🔐 Security Implementation <a name="security"></a>
-
-This project demonstrates comprehensive database security using PostgreSQL Row Level Security (RLS) and role-based access control.
-
-User Roles
-Admin Role
-
-Full CRUD (create, read, update, delete) permissions
-
-Can manage all users, events, and bookings
-
-Access to analytics and custom functions
-
-User Role
-
-Can only:
-
-View available events
-
-Book tickets for events
-
-View and manage their own bookings only
-
-Row Level Security Policies
-
-Users Table
-
-Users can view/update only their own record
-
-Admins can view/update all users
-
-Events Table
-
-Admins have full access
-
-Users can only view events
-
-Bookings Table
-
-Users can only view, insert, update, or delete their own bookings
-
-Admins have full access to all bookings
-
-Admin-Only Functions
-
-delete_event(event_id UUID)
-Deletes any event (uses SECURITY DEFINER).
-
-get_sales_summary()
-Returns total ticket sales and top events by revenue.
-
-archive_past_events()
-Moves completed events (older than today) to an archived state.
 
 ## 👥 Authors <a name="authors"></a>
 
