@@ -5,9 +5,10 @@ Overview
 
 This document outlines the security design, roles, policies, and database protection mechanisms implemented in the Event Ticketing System built with Supabase (PostgreSQL).
 It ensures compliance with best practices for Row Level Security (RLS), Role-Based Access Control (RBAC), and data privacy.
----
+
 
 🎫 Regular Users (role = 'user')
+---
 
 Can view available events
 
@@ -138,7 +139,8 @@ WITH CHECK (
 );
 ```
 A sreenshot of the policies 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6d93109c-105e-433d-bdfc-2deb4d138e6c" />
+<img width="1914" height="788" alt="image" src="https://github.com/user-attachments/assets/b996edf9-7c2f-48ec-b3a0-bc49eccd7783" />
+
 
 
 ⚙️ Authentication Rules
