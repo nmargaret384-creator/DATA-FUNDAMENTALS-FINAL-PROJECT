@@ -205,6 +205,23 @@ Each table has Row Level Security (RLS) enabled to ensure users can only access 
 | **Admin** | ✅ Full access     | Can view, update, and delete any ticket — useful for handling refunds, cancellations, or fraud.                                       |
 | **User**  | ✏️ Limited access | Can create (book) their own tickets and view, update, or cancel only their own bookings. Cannot see tickets belonging to other users. |
 
+Security Features
+Enable Authentication
+
+Go to your Supabase dashboard → Authentication → Providers
+
+Enable Email/Password sign-in (or Magic Link if preferred)
+
+Go to Policies for each table and make sure only authenticated users can access data
+
+```sql
+-- Example for events table
+CREATE POLICY "Only authenticated users can view events"
+ON events
+FOR SELECT
+USING (auth.role() = 'authenticated');
+```
+This ensures that anonymous visitors (not logged in) cannot see any data.
 
 
 ## 👥 Authors <a name="authors"></a>
