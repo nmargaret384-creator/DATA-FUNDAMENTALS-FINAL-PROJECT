@@ -226,53 +226,55 @@ Policies prevent users from viewing or editing other users’ bookings.
 
 This project demonstrates comprehensive database security using PostgreSQL Row Level Security (RLS) and role-based access control.
 
-### User Roles
+User Roles
+Admin Role
 
-#### Admin Role
-- **Full Access**: Can view, insert, update, and delete all data in all tables
-- **Administrative Functions**: Can execute admin-only custom functions
-- **User Management**: Can manage user accounts and roles
+Full CRUD (create, read, update, delete) permissions
 
-#### User Role  
-- **Restricted Access**: Can only view and modify their own data
-- **Data Isolation**: Cannot access other users' projects or tasks
-- **Role Protection**: Cannot change their own role to admin
+Can manage all users, events, and bookings
 
-### Row Level Security Policies
+Access to analytics and custom functions
 
-All tables have RLS enabled with specific policies:
+User Role
 
-#### Users Table Policies
-- ✅ Users can view their own profile
-- ✅ Users can update their own profile (except role)
-- ✅ Admins can view all users
-- ✅ Admins have full access to manage users
+Can only:
 
-#### Projects Table Policies
-- ✅ Users can view/create/update/delete their own projects
-- ✅ Admins have full access to all projects
+View available events
 
-#### Tasks Table Policies
-- ✅ Users can view/create/update/delete their own tasks
-- ✅ Admins have full access to all tasks
+Book tickets for events
 
-### Admin-Only Functions
+View and manage their own bookings only
 
-1. **delete_project(project_id UUID)**
-   - Deletes any project regardless of ownership
-   - Uses SECURITY DEFINER for elevated privileges
+Row Level Security Policies
 
-2. **get_user_statistics()**
-   - Returns aggregated statistics about users and their activity
-   - Useful for admin dashboards and reporting
+Users Table
 
-3. **archive_old_projects()**
-   - Automatically archives projects completed over 90 days ago
-   - Returns count of archived projects
+Users can view/update only their own record
 
-For detailed security documentation, see [security_notes.md](./security_notes.md).
+Admins can view/update all users
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Events Table
+
+Admins have full access
+
+Users can only view events
+
+Bookings Table
+
+Users can only view, insert, update, or delete their own bookings
+
+Admins have full access to all bookings
+
+Admin-Only Functions
+
+delete_event(event_id UUID)
+Deletes any event (uses SECURITY DEFINER).
+
+get_sales_summary()
+Returns total ticket sales and top events by revenue.
+
+archive_past_events()
+Moves completed events (older than today) to an archived state.
 
 ## 👥 Authors <a name="authors"></a>
 
@@ -283,68 +285,30 @@ For detailed security documentation, see [security_notes.md](./security_notes.md
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 🔭 Future Features <a name="future-features"></a>
+🔭 Future Features <a name="future-features"></a>
 
-Potential enhancements for this project:
+ Payment Integration – Link ticket purchases with payment gateways
 
-- [ ] **Audit Logging**: Add database triggers to track all admin actions for compliance
-- [ ] **Two-Factor Authentication**: Implement 2FA requirement for admin accounts
-- [ ] **Advanced Reporting**: Create additional statistical functions for project analytics
-- [ ] **Data Export**: Add admin functions to export data in various formats
-- [ ] **Email Notifications**: Set up automated notifications for project updates
+ Email Notifications – Send confirmations for ticket purchases
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+ Event Categories – Filter events by type (music, sports, etc.)
 
-<!-- CONTRIBUTING -->
+ Mobile Optimization – Build a responsive frontend
 
-## 🤝 Contributing <a name="contributing"></a>
+ User Reviews – Allow feedback on attended events
 
-Contributions, issues, and feature requests are welcome!
+🙏 Acknowledgements <a name="acknowledgements"></a>
 
-Feel free to check the [issues page](../../issues/).
+Thanks to the Supabase team for making secure app development accessible
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+PostgreSQL community for RLS and RBAC documentation
 
-## ⭐️ Show your support <a name="support"></a>
+Data Fundamentals instructors for teaching secure database design
 
-If you found this project helpful in understanding database security and Row Level Security implementation, please give it a ⭐️!
+📝 License <a name="license"></a>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+This project is MIT
+ licensed.
 
-<!-- ACKNOWLEDGEMENTS -->
-
-## 🙏 Acknowledgments <a name="acknowledgements"></a>
-
-- Thanks to the Supabase team for excellent documentation on RLS
-- PostgreSQL community for robust security features
-- Data Fundamentals course instructors for project guidance
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- FAQ -->
-
-## ❓ FAQ <a name="faq"></a>
-
-**How do I make a user an admin?**
-
-Update the user's role in the users table (requires admin access):
-```sql
-UPDATE users SET role = 'admin' WHERE email = 'user@example.com';
-```
-
-**Why can't I see other users' data?**
-
-This is by design! Row Level Security ensures users can only access their own data. Only admin users can see all data.
-
-**How do I test the security policies?**
-
-Sign in as different users (admin and regular user) and try to access various data. Regular users should only see their own projects and tasks.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
-
-## 📝 License <a name="license"></a>
-
-This project is [MIT](./LICENSE) licensed.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
