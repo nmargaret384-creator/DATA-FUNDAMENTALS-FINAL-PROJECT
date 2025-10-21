@@ -54,7 +54,7 @@ The project demonstrates Row Level Security (RLS), Role-Based Access Control (RB
 
 ### Key Features <a name="key-features"></a>
 
-🎟️ Event Ticketing System
+1. 🎟️ Event Ticketing System
 
 A relational database structure that manages users, events, and tickets — allowing users to browse events, purchase tickets, and manage their bookings securely.
 
@@ -209,6 +209,7 @@ The database consists of three main tables — users, events, and tickets.
 Each table has Row Level Security (RLS) enabled to ensure users can only access their own data, while admins have full control.
 
 🧑‍💻 Users Table
+
 | Column     | Type                      | Description                  |
 | ---------- | ------------------------- | ---------------------------- |
 | user_id    | `serial primary key`      | Unique user identifier       |
@@ -264,6 +265,13 @@ Each table has Row Level Security (RLS) enabled to ensure users can only access 
 
 ## 👥 Authors <a name="authors"></a>
 
+👤 **Author1**
+
+- GitHub: https://github.com/nmargaret384-creator
+- LinkedIn: www.linkedin.com/in/wanjikunyambura
+  
+
+
 
 
 ## 🔭 Future Features <a name="future-features"></a>
@@ -271,13 +279,13 @@ Each table has Row Level Security (RLS) enabled to ensure users can only access 
 
 Payment Integration – Connect ticket purchases with trusted payment gateways (e.g., Stripe or PayPal).
 
-Email Notifications – Automatically send confirmation emails for successful ticket purchases or event updates.
+  1.Email Notifications – Automatically send confirmation emails for successful ticket purchases or event updates.
 
- Event Categories & Filters – Enable users to browse events by category (Music, Sports, Tech, etc.).
+  2.Event Categories & Filters – Enable users to browse events by category (Music, Sports, Tech, etc.).
 
-Mobile Optimization – Improve responsive design for seamless access on mobile and tablet devices.
+  3.Mobile Optimization – Improve responsive design for seamless access on mobile and tablet devices.
 
-User Reviews & Ratings – Allow users to share feedback and rate events they’ve attended.
+  4.User Reviews & Ratings – Allow users to share feedback and rate events they’ve attended.
 
 🙏 Acknowledgements <a name="acknowledgements"></a>
 
