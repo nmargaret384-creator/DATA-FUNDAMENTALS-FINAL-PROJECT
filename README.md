@@ -16,17 +16,15 @@
   - [Admin-Only Functions](#admin-only-functions)
 - [👥 Authors](#authors)
 - [🔭 Future Features](#future-features)
-- [🤝 Contributing](#contributing)
 - [⭐️ Show your support](#support)
 - [🙏 Acknowledgements](#acknowledgements)
-- [❓ FAQ](#faq)
 - [📝 License](#license)
 
 ---
 
 # 📖 Data Fundamentals Final Project <a name="about-project"></a>
 
-This  is a written version of your README with all the sections adapted for an Event Management and Ticketing database which   includes event listings, users, and bookings, plus admin control and RLS (Row Level Security).
+This  is a written version the README with all the sections adapted for an Event Management and Ticketing database which   includes event listings, users, and bookings, plus admin control and RLS (Row Level Security).
 
 This is a secure event ticketing platform built using Supabase (PostgreSQL). It allows users to browse events, purchase tickets, and manage bookings  while administrators can manage events, users, and sales analytics.
 
@@ -56,97 +54,154 @@ The project demonstrates Row Level Security (RLS), Role-Based Access Control (RB
 
 ### Key Features <a name="key-features"></a>
 
-🎟 Event Management – Admins can create, update, and delete events
+🎟️ Event Ticketing System
 
-💳 Ticket Booking – Users can purchase and manage their own event tickets
+A relational database structure that manages users, events, and tickets — allowing users to browse events, purchase tickets, and manage their bookings securely.
 
-🔐 RLS & RBAC – Secure access: users see only their bookings; admins see all data
+2. 👥 Role-Based Access Control (RBAC)
 
-📅 Event Catalog – Dynamic list of events (name, date, location, price)
+Implements two distinct roles:
 
-📊 Admin Dashboard Functions – View sales, top events, and user activity
+Admin: Has full CRUD (Create, Read, Update, Delete) access to all tables (events, tickets, and users).
 
-🛡️ Least Privilege Principle – Every role has only the access it needs
+User: Can only view and modify their own data — ensuring data isolation and privacy.
 
+3. 🛡️ Row Level Security (RLS)
+
+Every table (users, events, tickets) is protected by Row Level Security policies, ensuring users only see or modify records associated with their account.
+
+4. 🔐 Supabase Auth Integration
+
+Authentication is managed through Supabase Auth using email/password or magic links.
+Only verified and authenticated users can interact with the database.
+
+5. ⚙️ Admin-Only Functions
+
+Includes custom SQL functions such as:
+
+delete_event(event_id) – Admin-only deletion of events.
+
+view_user_activity() – Summarizes user ticket purchases and event participation.
+
+These are protected with SECURITY DEFINER to ensure only admins can execute them.
+
+6. 📊 Secure Data Management
+
+Implements the principle of least privilege, ensuring users have the minimal permissions needed to perform their tasks while maintaining system integrity.
+
+7. 🗂️ Well-Structured Database Schema
+
+users → Stores user details and roles
+
+events → Stores event information
+
+tickets → Links users to events and manages ticket purchases
+
+Each table contains appropriate foreign keys and timestamps for auditability.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 💻 Getting Started <a name="getting-started"></a>
+💻 Getting Started <a name="getting-started"></a>
 
-This project is designed to be deployed on Supabase. Follow these steps to set up your own instance.
+This project is designed to demonstrate database security implementation in Supabase using an Event Ticketing System.
+It builds on the database created in your previous project — you will use the same tables but focus on adding user roles, Row Level Security (RLS), and access control policies.
 
-### Prerequisites
+🧩 Prerequisites
 
-To run this project you need:
+To run and test this project, you need:
 
-- A [Supabase](https://supabase.com/) account 
-- Basic understanding of SQL and PostgreSQL
-- A SQL client or the Supabase SQL Editor
+A Supabase
+ account
 
-  
+Access to your existing Supabase project from the Data Tools Final Project
 
-### Setup
+Basic understanding of SQL and PostgreSQL
 
- **Create a Supabase Project**
-   - Go to [Supabase Dashboard](https://app.supabase.com/)
-   - Click "New Project"
-   - Choose an organization of your own  and fill in project details
+The Supabase SQL Editor or any SQL client (e.g., DBeaver, pgAdmin)
 
-     
+⚙️ Setup
 
+Open Your Existing Supabase Project
 
-  ### Install
+Log in to Supabase Dashboard
 
-  1.**Execute the Database Schema**
- 
-1.Create a Supabase Project
- 
-2.Log into Supabase and click “New Project”
+Open the project where your tables (users, events, tickets) already exist
 
-3.Name your project “Event Ticketing”
+Enable Row Level Security (RLS)
 
-4.Copy your connection string (you’ll use it later)
+Go to Table Editor → Select a table → Row Level Security
 
-2. **Verify Table Creation**
-   - Go to Table Editor in Supabase
-   - Confirm you see: `users`, `projects`, and `tasks` tables
-   - Check that sample data is populated (5+ rows per table)
+Toggle Enable RLS for all three tables (users, events, tickets)
 
-3. **Enable Authentication**
-   - Navigate to Authentication settings
-   - Enable Email/Password or Magic Link authentication
-   - Configure email templates as needed
+Create User Roles
 
-### Usage
+In your users table, ensure there’s a role column with values 'admin' or 'user'
 
-#### For Regular Users:
+Example SQL: 
 
-Sign up through Supabase Auth
+```sql
+ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user';
+```
+Add Row Level Security Policies
+
+Open the SQL Editor in Supabase
+
+Paste and run your security policies for each table:
+
+Users can only view or edit their own data
+
+Admins have full access to all records
+
+Users can insert and view only their own tickets
+
+Admins can manage all events and tickets
+
+(Example policies are included later in the security notes.md)
+
+Enable Authentication
+
+Go to Authentication → Providers
+
+Enable Email/Password or Magic Link
+
+Ensure that only authenticated users can interact with the database
+
+▶️ Usage
+For Regular Users:
+
+Sign up or log in via Supabase Auth
 
 Your user record is automatically created with role = 'user'
 
-You can browse events, book tickets, and view your own ticket history
+You can:
 
-You can update or cancel your own ticket bookings
+Browse available events
 
-❌ You cannot view or modify other users’ tickets or events you didn’t create
+Book tickets for events
 
-#### For Event Organizers (Admins):
+View and manage (update/cancel) your own tickets
+
+You cannot access or modify:
+
+Other users’ profiles
+
+Events or tickets created by other users
+
+For Admins:
 
 Users with role = 'admin' in the users table have full access
 
-Can create, update, and delete events
+Admins can:
 
-Can view all users and all ticket sales
+Create, update, and delete any event
 
-Can manage event capacity, pricing, and availability
+View all users and ticket sales
 
-Can execute admin-only SQL functions, such as:
+Manage event pricing, capacity, and availability
 
-```sql
-DELETE FROM tickets
-WHERE status = 'cancelled';
+Execute admin-only SQL functions, such as:
+ ```sql
+ DELETE FROM tickets WHERE status = 'cancelled';
 ```
-
 
 ### Database Structure
 
@@ -205,58 +260,40 @@ Each table has Row Level Security (RLS) enabled to ensure users can only access 
 | **Admin** | ✅ Full access     | Can view, update, and delete any ticket — useful for handling refunds, cancellations, or fraud.                                       |
 | **User**  | ✏️ Limited access | Can create (book) their own tickets and view, update, or cancel only their own bookings. Cannot see tickets belonging to other users. |
 
-Security Features
-Enable Authentication
-
-Go to your Supabase dashboard → Authentication → Providers
-
-Enable Email/Password sign-in (or Magic Link if preferred)
-
-Go to Policies for each table and make sure only authenticated users can access data
-
-```sql
--- Example for events table
-CREATE POLICY "Only authenticated users can view events"
-ON events
-FOR SELECT
-USING (auth.role() = 'authenticated');
-```
-This ensures that anonymous visitors (not logged in) cannot see any data.
 
 
 ## 👥 Authors <a name="authors"></a>
 
-👤 **PetitKwoba**
 
-- GitHub: [@PetitKwoba](https://github.com/PetitKwoba)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 🔭 Future Features <a name="future-features"></a>
-🔭 Future Features <a name="future-features"></a>
+🚀 As this project evolves, the following enhancements will be added to improve user experience and system scalability:
 
- Payment Integration – Link ticket purchases with payment gateways
+Payment Integration – Connect ticket purchases with trusted payment gateways (e.g., Stripe or PayPal).
 
- Email Notifications – Send confirmations for ticket purchases
+Email Notifications – Automatically send confirmation emails for successful ticket purchases or event updates.
 
- Event Categories – Filter events by type (music, sports, etc.)
+ Event Categories & Filters – Enable users to browse events by category (Music, Sports, Tech, etc.).
 
- Mobile Optimization – Build a responsive frontend
+Mobile Optimization – Improve responsive design for seamless access on mobile and tablet devices.
 
- User Reviews – Allow feedback on attended events
+User Reviews & Ratings – Allow users to share feedback and rate events they’ve attended.
 
 🙏 Acknowledgements <a name="acknowledgements"></a>
 
-Thanks to the Supabase team for making secure app development accessible
+Special thanks to:
 
-PostgreSQL community for RLS and RBAC documentation
+The Supabase Team for providing a powerful, developer-friendly backend platform.
 
-Data Fundamentals instructors for teaching secure database design
+The PostgreSQL Community for comprehensive documentation on RLS (Row Level Security) and role-based access control.
+
+Data Fundamentals Instructors, for guiding secure database design principles and real-world implementation.
+
+Everyone who contributed feedback and testing during the development phase.
 
 📝 License <a name="license"></a>
 
-This project is MIT
- licensed.
+This project is MIT Licensed — meaning you’re free to use, modify, and distribute it with proper credit to the author.
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
