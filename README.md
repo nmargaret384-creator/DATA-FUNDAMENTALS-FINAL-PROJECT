@@ -37,12 +37,6 @@ The project demonstrates Row Level Security (RLS), Role-Based Access Control (RB
 
 ### Tech Stack <a name="tech-stack"></a>
 
-<details>
-  <summary>Backend as a Service</summary>
-  <ul>
-    <li><a href="https://supabase.com/">Supabase</a></li>
-  </ul>
-</details>
 
 <details>
 <summary>Database</summary>
@@ -62,11 +56,17 @@ The project demonstrates Row Level Security (RLS), Role-Based Access Control (RB
 
 ### Key Features <a name="key-features"></a>
 
-- **🔐 Row Level Security (RLS)**: Comprehensive database-level security ensuring users can only access their own data
-- **👥 Role-Based Access Control**: Distinct Admin and User roles with appropriate permissions
-- **🛡️ Admin-Only Functions**: Custom PostgreSQL functions with elevated privileges for administrative tasks
-- **📊 Multi-Table Schema**: Well-structured database with Users, Projects, and Tasks tables
-- **🔒 Least Privilege Principle**: Security implementation following industry best practices
+🎟 Event Management – Admins can create, update, and delete events
+
+💳 Ticket Booking – Users can purchase and manage their own event tickets
+
+🔐 RLS & RBAC – Secure access: users see only their bookings; admins see all data
+
+📅 Event Catalog – Dynamic list of events (name, date, location, price)
+
+📊 Admin Dashboard Functions – View sales, top events, and user activity
+
+🛡️ Least Privilege Principle – Every role has only the access it needs
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -78,30 +78,33 @@ This project is designed to be deployed on Supabase. Follow these steps to set u
 
 To run this project you need:
 
-- A [Supabase](https://supabase.com/) account (free tier available)
+- A [Supabase](https://supabase.com/) account 
 - Basic understanding of SQL and PostgreSQL
 - A SQL client or the Supabase SQL Editor
 
+  
+
 ### Setup
 
-1. **Create a Supabase Project**
+ **Create a Supabase Project**
    - Go to [Supabase Dashboard](https://app.supabase.com/)
    - Click "New Project"
-   - Choose an organization and fill in project details
+   - Choose an organization of your own  and fill in project details
 
-2. **Clone this repository** (optional, for reference):
-   ```sh
-   git clone https://github.com/PetitKwoba/data-fundamentals-final-project.git
-   cd data-fundamentals-final-project
-   ```
+     
 
-### Install
 
-1. **Execute the Database Schema**
-   - Open your Supabase project
-   - Navigate to the SQL Editor
-   - Copy the entire contents of `schema.sql`
-   - Paste and execute the SQL commands
+  ### Install
+
+  1.**Execute the Database Schema**
+ 
+1.Create a Supabase Project
+ 
+2.Log into Supabase and click “New Project”
+
+3.Name your project “Event Ticketing”
+
+4.Copy your connection string (you’ll use it later)
 
 2. **Verify Table Creation**
    - Go to Table Editor in Supabase
@@ -116,58 +119,106 @@ To run this project you need:
 ### Usage
 
 #### For Regular Users:
-- Sign up through Supabase Auth
-- Your user record will be created with `role = 'user'`
-- You can view, create, update, and delete your own projects and tasks
-- You cannot access other users' data
 
-#### For Administrators:
-- Users with `role = 'admin'` in the users table have full access
-- Can view and manage all users, projects, and tasks
-- Can execute admin-only functions:
-  ```sql
-  -- Delete any project
-  SELECT delete_project('project-uuid-here');
-  
-  -- Get user statistics
-  SELECT * FROM get_user_statistics();
-  
-  -- Archive old completed projects
-  SELECT * FROM archive_old_projects();
-  ```
+Sign up through Supabase Auth
+
+Your user record is automatically created with role = 'user'
+
+You can browse events, book tickets, and view your own ticket history
+
+You can update or cancel your own ticket bookings
+
+❌ You cannot view or modify other users’ tickets or events you didn’t create
+
+#### For Event Organizers (Admins):
+
+Users with role = 'admin' in the users table have full access
+
+Can create, update, and delete events
+
+Can view all users and all ticket sales
+
+Can manage event capacity, pricing, and availability
+
+Can execute admin-only SQL functions, such as:
+
+```sql
+-- Delete any event (admin-only)
+SELECT delete_event('event-uuid-here');
+
+-- Generate event sales report
+SELECT * FROM get_event_sales_report();
+
+-- Archive past events (e.g., older than 6 months)
+SELECT * FROM archive_past_events();
+```
+
+
+
 
 ### Database Structure
 
-#### Users Table
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| email | TEXT | User email (unique) |
-| full_name | TEXT | User's full name |
-| role | TEXT | 'admin' or 'user' |
-| created_at | TIMESTAMP | Creation timestamp |
+The database consists of three main tables — users, events, and tickets.
+Each table has Row Level Security (RLS) enabled to ensure users can only access their own data, while admins have full control.
 
-#### Projects Table
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| user_id | UUID | Foreign key to users |
-| name | TEXT | Project name |
-| description | TEXT | Project description |
-| status | TEXT | 'active', 'completed', or 'archived' |
-| created_at | TIMESTAMP | Creation timestamp |
+🧑‍💻 Users Table
+| Column     | Type      | Description                                 |
+| ---------- | --------- | ------------------------------------------- |
+| id         | UUID      | Primary key (matches Supabase Auth user ID) |
+| full_name  | TEXT      | User’s full name                            |
+| email      | TEXT      | User email (unique)                         |
+| role       | TEXT      | `'admin'` or `'user'`                       |
+| created_at | TIMESTAMP | Record creation time                        |
 
-#### Tasks Table
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| project_id | UUID | Foreign key to projects |
-| user_id | UUID | Foreign key to users |
-| title | TEXT | Task title |
-| description | TEXT | Task description |
-| priority | TEXT | 'low', 'medium', or 'high' |
-| completed | BOOLEAN | Completion status |
-| created_at | TIMESTAMP | Creation timestamp |
+Notes:
+
+Admins can view and manage all users.
+
+Regular users can only view or edit their own profile (except the role field).
+
+
+🎤 Events Table
+
+| Column      | Type      | Description                        |
+| ----------- | --------- | ---------------------------------- |
+| id          | UUID      | Primary key                        |
+| admin_id    | UUID      | Foreign key referencing `users.id` |
+| title       | TEXT      | Event title                        |
+| description | TEXT      | Event description                  |
+| location    | TEXT      | Venue or city name                 |
+| event_date  | DATE      | Date of the event                  |
+| price       | NUMERIC   | Ticket price                       |
+| capacity    | INTEGER   | Total number of tickets available  |
+| created_at  | TIMESTAMP | When the event was created         |
+
+Notes:
+
+Only admins (event organizers) can create, update, or delete events.
+
+Regular users can view all events but not modify them.
+
+RLS ensures users can’t insert or modify events unless they are admins.
+
+🎫 Tickets Table
+
+| Column      | Type      | Description                            |
+| ----------- | --------- | -------------------------------------- |
+| id          | UUID      | Primary key                            |
+| event_id    | UUID      | Foreign key referencing `events.id`    |
+| user_id     | UUID      | Foreign key referencing `users.id`     |
+| quantity    | INTEGER   | Number of tickets purchased            |
+| total_price | NUMERIC   | Auto-calculated as `price * quantity`  |
+| status      | TEXT      | `'booked'`, `'cancelled'`, or `'used'` |
+| created_at  | TIMESTAMP | Booking timestamp                      |
+
+Notes:
+
+Regular users can view and manage their own tickets only.
+
+Admins can view all tickets to monitor event sales.
+
+Policies prevent users from viewing or editing other users’ bookings.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
